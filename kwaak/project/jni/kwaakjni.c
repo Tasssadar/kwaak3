@@ -169,7 +169,7 @@ JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_drawFrame(JNIEnv *env, jclass c)
 JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_queueKeyEvent(JNIEnv *env, jclass c, jint key, jint state)
 {
 #ifdef DEBUG
-    __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "queueEvent(%d, %d, %d)", event_type, key, state);
+    __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "queueKeyEvent(%d, %d)", key, state);
 #endif
     if(queueKeyEvent) queueKeyEvent(key, state);
 }
@@ -177,7 +177,7 @@ JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_queueKeyEvent(JNIEnv *env, jclas
 JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_queueMotionEvent(JNIEnv *env, jclass c, jint action, jfloat x, jfloat y, jfloat pressure)
 {
 #ifdef DEBUG
-    __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "queueEvent(%d, %d, %d)", event_type, key, state);
+    __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "queueMotionEvent(%d, %f, %f, %f)", action, x, y, pressure);
 #endif
     if(queueMotionEvent) queueMotionEvent(action, x, y, pressure);
 }
@@ -185,7 +185,7 @@ JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_queueMotionEvent(JNIEnv *env, jc
 JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_queueTrackballEvent(JNIEnv *env, jclass c, jint action, jfloat x, jfloat y)
 {
 #ifdef DEBUG
-    __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "queueEvent(%d, %d, %d)", event_type, key, state);
+    __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "queueTrackballEvent(%d, %f, %f)", action, x, y);
 #endif
     if(queueTrackballEvent) queueTrackballEvent(action, x, y);
 }
