@@ -23,7 +23,7 @@ import java.io.File;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.res.Configuration;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Window;
@@ -32,25 +32,32 @@ import android.view.WindowManager;
 public class Game extends Activity {
 	private KwaakView mGLSurfaceView;
 
+	private void showError(String s)
+	{
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(s);
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+	           public void onClick(DialogInterface dialog, int id) {
+	                Game.this.finish();
+	           }
+	       });
+		AlertDialog dialog = builder.create();
+		dialog.show();
+	}
+	
 	private boolean checkGameFiles()
 	{
-		File quake3_dir = new File("/sdcard/quake3");
+		File quake3_dir = new File("/sdcard/quake31");
 		if(quake3_dir.exists() == false)
 		{
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setMessage("Unable to locate /sdcard/quake3.");
-			AlertDialog dialog = builder.create();
-			dialog.show();
+			showError("Unable to locate /sdcard/quake3.");
 			return false;
 		}
 
 		File baseq3_dir = new File("/sdcard/quake3/baseq3");
 		if(baseq3_dir.exists() == false)
 		{
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setMessage("Unable to locate /sdcard/quake3/baseq3.");
-			AlertDialog dialog = builder.create();
-			dialog.show();
+			showError("Unable to locate /sdcard/quake3/baseq3.");
 			return false;
 		}
 
@@ -61,10 +68,7 @@ public class Game extends Activity {
 			File quake3_pak_file = new File("/sdcard/quake3/baseq3/" + pak_filename);
 			if(quake3_pak_file.exists() == false)
 			{
-				AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				builder.setMessage("Unable to locate /sdcard/quake3/baseq3/"+pak_filename);
-				AlertDialog dialog = builder.create();
-				dialog.show();
+				showError("Unable to locate /sdcard/quake3/baseq3/"+pak_filename);
 				return false;
 			}			
 		}
