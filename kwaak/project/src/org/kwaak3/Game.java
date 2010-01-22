@@ -47,7 +47,7 @@ public class Game extends Activity {
 	
 	private boolean checkGameFiles()
 	{
-		File quake3_dir = new File("/sdcard/quake31");
+		File quake3_dir = new File("/sdcard/quake3");
 		if(quake3_dir.exists() == false)
 		{
 			showError("Unable to locate /sdcard/quake3.");
