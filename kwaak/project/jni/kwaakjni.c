@@ -24,17 +24,26 @@
 
 #include "org_kwaak3_KwaakJNI.h"
 
+/* Function pointers to Quake3 code */
 int  (*q3main)(int argc, char **argv);
 void (*drawFrame)();
 void (*queueKeyEvent)(int key, int state);
 void (*queueMotionEvent)(int action, float x, float y, float pressure);
 void (*queueTrackballEvent)(int action, float x, float y);
+void (*requestAudioData)();
+void (*setAudioCallbacks)(void *func, void *func2, void *func3);
 void (*setResolution)(int width, int height);
+
+/* Callbacks to Android */
+jmethodID android_getPos;
+jmethodID android_initAudio;
+jmethodID android_writeAudio;
 
 /* Containts the path to /data/data/(package_name)/libs */
 static char* lib_dir=NULL;
 
 static JavaVM *jVM;
+static jobject kwaakAudioObj=0;
 static void *libdl;
 static int init=0;
 
@@ -120,9 +129,47 @@ static void load_libquake3()
     queueKeyEvent = dlsym(libdl, "queueKeyEvent");
     queueMotionEvent = dlsym(libdl, "queueMotionEvent");
     queueTrackballEvent = dlsym(libdl, "queueTrackballEvent");
+    requestAudioData = dlsym(libdl, "requestAudioData");
+    setAudioCallbacks = dlsym(libdl, "setAudioCallbacks");
     setResolution = dlsym(libdl, "setResolution");
     init=1;
 }
+
+int getPos()
+{
+    JNIEnv *env;
+    (*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4);
+#ifdef DEBUG
+    __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "getPos");
+#endif
+    return (*env)->CallIntMethod(env, kwaakAudioObj, android_getPos);
+}
+
+void initAudio()
+{
+    JNIEnv *env;
+    (*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4);
+#ifdef DEBUG
+    __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "initAudio");
+#endif
+    return (*env)->CallVoidMethod(env, kwaakAudioObj, android_initAudio);
+}
+
+void writeAudio(void *data, int length)
+{
+    JNIEnv *env;
+    (*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4);
+#ifdef DEBUG
+    __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "writeAudio data=%p length=%d", data, length);
+#endif
+
+    jbyteArray array = (*env)->NewByteArray(env, length);
+    if(array) {
+        (*env)->SetByteArrayRegion(env, array, 0, length, data);
+        (*env)->CallVoidMethod(env, kwaakAudioObj, android_writeAudio, array, length );
+    }
+}
+
 
 int JNI_OnLoad(JavaVM* vm, void* reserved)
 {
@@ -144,6 +191,19 @@ int JNI_OnLoad(JavaVM* vm, void* reserved)
     return JNI_VERSION_1_4;
 }
 
+JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_setAudio(JNIEnv *env, jclass c, jobject obj)
+{
+    kwaakAudioObj = obj;
+    jclass kwaakAudioClass;
+
+    (*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4);
+    kwaakAudioClass = (*env)->GetObjectClass(env, kwaakAudioObj);
+
+    android_getPos = (*env)->GetMethodID(env,kwaakAudioClass,"getPos","()I");
+    android_initAudio = (*env)->GetMethodID(env,kwaakAudioClass,"initAudio","()V");
+    android_writeAudio = (*env)->GetMethodID(env,kwaakAudioClass,"writeAudio","([BI)V");
+}
+
 
 JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_initGame(JNIEnv *env, jclass c, jint width, jint height)
 {
@@ -152,6 +212,7 @@ JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_initGame(JNIEnv *env, jclass c, 
     __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "initGame(%d, %d)", width, height);
 #endif
 
+    setAudioCallbacks(&getPos, &writeAudio, &initAudio);
     setResolution(width, height);
 
     /* In the future we might want to pass arguments using argc/argv e.g. to start a benchmark at startup, to load a mod or whatever */
@@ -190,6 +251,10 @@ JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_queueTrackballEvent(JNIEnv *env,
     if(queueTrackballEvent) queueTrackballEvent(action, x, y);
 }
 
+JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_requestAudioData(JNIEnv *env, jclass c)
+{
+    if(requestAudioData) requestAudioData();
+}
 
 JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_setLibraryDirectory(JNIEnv *env, jclass c, jstring jpath)
 {

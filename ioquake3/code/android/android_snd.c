@@ -1,47 +1,83 @@
 /*
-===========================================================================
-Copyright (C) 1999-2005 Id Software, Inc.
+ * Android audio code for Quake3
+ * Copyright (C) 2010 Roderick Colenbrander
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
 
-This file is part of Quake III Arena source code.
+#include "../client/snd_local.h"
 
-Quake III Arena source code is free software; you can redistribute it
-and/or modify it under the terms of the GNU General Public License as
-published by the Free Software Foundation; either version 2 of the License,
-or (at your option) any later version.
+static int buf_size=0;
+static int bytes_per_sample=0;
+static int chunkSizeBytes=0;
+static int dmapos=0;
 
-Quake III Arena source code is distributed in the hope that it will be
-useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+int  (*getPos)(void);
+void (*initAudio)(void);
+void (*writeAudio)(void *data, int length);
 
-You should have received a copy of the GNU General Public License
-along with Quake III Arena source code; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-===========================================================================
-*/
-
-// snddma_null.c
-// all other sound mixing is portable
-
-#include "../qcommon/q_shared.h"
-#include "../qcommon/qcommon.h"
+void setAudioCallbacks(void *get_pos, void *write_audio, void *init_audio)
+{
+    getPos = get_pos;
+    writeAudio = write_audio;
+    initAudio = init_audio;
+}
 
 qboolean SNDDMA_Init(void)
 {
-	return qfalse;
+    Com_Printf("Initializing Android Sound subsystem\n");
+
+    /* For now hardcode this all :) */
+    dma.channels = 2;
+    dma.samples = 32768;
+    dma.samplebits = 16;
+
+    dma.submission_chunk = 4096; /* This is in single samples, so this would equal 2048 frames (assuming stereo) in Android terminology */
+    dma.speed = 44100; /* This is the native sample frequency of the Milestone */
+
+    bytes_per_sample = dma.samplebits/8;
+    buf_size = dma.samples * bytes_per_sample;
+    dma.buffer = calloc(1, buf_size);
+
+    chunkSizeBytes = dma.submission_chunk * bytes_per_sample;
+
+    initAudio();
+
+    return qtrue;
 }
 
-int	SNDDMA_GetDMAPos(void)
+
+int SNDDMA_GetDMAPos(void)
 {
-	return 0;
+    return dmapos;
 }
 
 void SNDDMA_Shutdown(void)
 {
+    Com_Printf("SNDDMA_ShutDown\n");
 }
 
 void SNDDMA_BeginPainting (void)
 {
+}
+
+void requestAudioData(void)
+{
+    int offset = (dmapos * bytes_per_sample) & (buf_size - 1);
+    writeAudio(dma.buffer+offset, chunkSizeBytes);
+    dmapos+=dma.submission_chunk;
 }
 
 void SNDDMA_Submit(void)

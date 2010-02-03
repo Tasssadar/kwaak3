@@ -9,6 +9,14 @@ extern "C" {
 #endif
 /*
  * Class:     org_kwaak3_KwaakJNI
+ * Method:    setAudio
+ * Signature: (Lorg/kwaak3/KwaakAudio;)V
+ */
+JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_setAudio
+  (JNIEnv *, jclass, jobject);
+
+/*
+ * Class:     org_kwaak3_KwaakJNI
  * Method:    initGame
  * Signature: (II)V
  */
@@ -54,6 +62,14 @@ JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_queueMotionEvent
  */
 JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_queueTrackballEvent
   (JNIEnv *, jclass, jint, jfloat, jfloat);
+
+/*
+ * Class:     org_kwaak3_KwaakJNI
+ * Method:    requestAudioData
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_requestAudioData
+  (JNIEnv *, jclass);
 
 #ifdef __cplusplus
 }
