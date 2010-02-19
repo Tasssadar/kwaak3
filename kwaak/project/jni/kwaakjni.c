@@ -43,6 +43,7 @@ jmethodID android_writeAudio;
 static char* lib_dir=NULL;
 
 static JavaVM *jVM;
+static jboolean audioEnabled=1;
 static jobject kwaakAudioObj=0;
 static void *libdl;
 static int init=0;
@@ -191,6 +192,11 @@ int JNI_OnLoad(JavaVM* vm, void* reserved)
     return JNI_VERSION_1_4;
 }
 
+JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_enableAudio(JNIEnv *env, jclass c, jboolean enable)
+{
+    audioEnabled = enable;
+}
+
 JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_setAudio(JNIEnv *env, jclass c, jobject obj)
 {
     kwaakAudioObj = obj;
@@ -207,7 +213,14 @@ JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_setAudio(JNIEnv *env, jclass c, 
 
 JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_initGame(JNIEnv *env, jclass c, jint width, jint height)
 {
-    char *argv = '\0';
+    char *argv[2];
+    int argc=0;
+
+    if(!audioEnabled)
+    {
+        argv[0] = strdup("+set s_initsound 0");
+        argc = 1;
+    }
 #ifdef DEBUG
     __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "initGame(%d, %d)", width, height);
 #endif
@@ -216,7 +229,7 @@ JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_initGame(JNIEnv *env, jclass c, 
     setResolution(width, height);
 
     /* In the future we might want to pass arguments using argc/argv e.g. to start a benchmark at startup, to load a mod or whatever */
-    q3main(0, &argv);
+    q3main(argc, argv);
 }
 
 JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_drawFrame(JNIEnv *env, jclass c)

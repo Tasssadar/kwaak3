@@ -30,6 +30,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 public class Game extends Activity {
+	private KwaakAudio mKwaakAudio;
 	private KwaakView mGLSurfaceView;
 
 	private void showError(String s)
@@ -37,14 +38,14 @@ public class Game extends Activity {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage(s);
 		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-	           public void onClick(DialogInterface dialog, int id) {
-	                Game.this.finish();
-	           }
-	       });
+			public void onClick(DialogInterface dialog, int id) {
+				Game.this.finish();
+			}
+		});
 		AlertDialog dialog = builder.create();
 		dialog.show();
 	}
-	
+
 	private boolean checkGameFiles()
 	{
 		File quake3_dir = new File("/sdcard/quake3");
@@ -90,6 +91,22 @@ public class Game extends Activity {
 			setContentView(mGLSurfaceView);
 			mGLSurfaceView.requestFocus();
 			mGLSurfaceView.setId(1);
+
+			/* The KwaakAudio object is owned by the Game class but is only used
+			 * by the game library using JNI calls. It is not that pretty but it
+			 * is the only way without using the (unstable) AudioTrack API from C++.
+			 */
+			mKwaakAudio = new KwaakAudio();
+			KwaakJNI.setAudio(mKwaakAudio);
+
+			Bundle extras = getIntent().getExtras();
+			if(extras != null)
+			{
+				/* We use a separate call for disabling audio because a user
+				 * can reactivate audio from the q3 console by issuing 's_initsound 1' + 'snd_restart'
+				 */
+				KwaakJNI.enableAudio(extras.getBoolean("sound"));
+			}
 		}
 		else
 		{
@@ -103,16 +120,28 @@ public class Game extends Activity {
 	}
 
 	@Override
+	protected void onPause() {
+		//Log.d("Quake_JAVA", "onPause");
+		super.onPause();
+
+		if(mKwaakAudio != null)
+			mKwaakAudio.pause();
+	}
+
+	@Override
 	protected void onResume() {
 		/* Resume doesn't always seem to work well. On my Milestone it works
 		 * but not on the G1. The native code seems to be running but perhaps
 		 * we need to issue a 'vid_restart'.
 		 */
-		Log.d("Quake_JAVA", "onResume");
+		//Log.d("Quake_JAVA", "onResume");
 		super.onResume();
 		if(mGLSurfaceView != null)
 		{
 			mGLSurfaceView.onResume();
 		}
+
+		if(mKwaakAudio != null)
+			mKwaakAudio.resume();
 	}
 }

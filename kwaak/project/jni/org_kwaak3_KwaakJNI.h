@@ -9,6 +9,14 @@ extern "C" {
 #endif
 /*
  * Class:     org_kwaak3_KwaakJNI
+ * Method:    enableAudio
+ * Signature: (Z)V
+ */
+JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_enableAudio
+  (JNIEnv *, jclass, jboolean);
+
+/*
+ * Class:     org_kwaak3_KwaakJNI
  * Method:    setAudio
  * Signature: (Lorg/kwaak3/KwaakAudio;)V
  */
