@@ -558,7 +558,7 @@ int main( int argc, char **argv )
 	Sys_SetDefaultInstallPath( DEFAULT_BASEDIR );
 
 	// Concatenate the command line for passing to Com_Init
-	for( i = 1; i < argc; i++ )
+	for( i = 0; i < argc; i++ )
 	{
 		Q_strcat( commandLine, sizeof( commandLine ), argv[ i ] );
 		Q_strcat( commandLine, sizeof( commandLine ), " " );
