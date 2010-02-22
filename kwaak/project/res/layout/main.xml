@@ -6,4 +6,6 @@
     >
 
 
+<Button android:id="@+id/btnStartGame" android:text="Start game" android:layout_height="wrap_content" android:layout_width="fill_parent" android:typeface="normal"></Button>
+<CheckBox android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/chkEnableSound" android:text="Enable sound" android:checked="true"></CheckBox>
 </LinearLayout>
