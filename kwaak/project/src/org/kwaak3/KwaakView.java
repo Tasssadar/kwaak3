@@ -32,7 +32,7 @@ class KwaakView extends GLSurfaceView {
 	
 	public KwaakView(Context context){
 		super(context);
-		
+
 		/* We need the path to the library directory for dlopen in our JNI library */
 		String cache_dir, lib_dir;
 		try {
@@ -123,7 +123,6 @@ class KwaakView extends GLSurfaceView {
 
 	private int androidKeyCodeToQuake(int aKeyCode, KeyEvent event)
 	{	
-		//TODO: fix backspace
 		/* Convert non-ASCII keys by hand */
 		switch(aKeyCode)
 		{
@@ -136,6 +135,8 @@ class KwaakView extends GLSurfaceView {
 			case KeyEvent.KEYCODE_DPAD_RIGHT:
 				return QK_RIGHT;
 			case KeyEvent.KEYCODE_DPAD_CENTER:
+				/* Center is useful for shooting if you only use the keyboard */
+				return QK_CTRL;
 			case KeyEvent.KEYCODE_ENTER:
 				return QK_ENTER;
 			case KeyEvent.KEYCODE_SEARCH:
@@ -149,7 +150,7 @@ class KwaakView extends GLSurfaceView {
 			case KeyEvent.KEYCODE_SHIFT_LEFT:
 				return QK_SHIFT;
 		}
-		
+
 		/* Let Android do all the character conversion for us. This way we don't have
 		 * to care about modifier keys and specific keyboard layouts.
 		 * TODO: add some more filtering
