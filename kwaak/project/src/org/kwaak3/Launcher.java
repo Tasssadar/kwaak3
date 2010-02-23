@@ -2,6 +2,7 @@ package org.kwaak3;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -22,6 +23,12 @@ public class Launcher extends Activity{
 				intent.putExtra("sound", chk.isChecked());
 				startActivity(intent);
 			}});
-
+		
+		button = (Button)findViewById(R.id.btnVisitWebsite);
+		button.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://code.google.com/p/kwaak3/"));
+				startActivity(intent);
+			}});
 	}
 }
