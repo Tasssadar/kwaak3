@@ -139,6 +139,10 @@ class KwaakView extends GLSurfaceView {
 			 */
 			case KeyEvent.KEYCODE_FOCUS:
 				return QK_F1;
+			case KeyEvent.KEYCODE_VOLUME_DOWN:
+				return QK_F2;
+			case KeyEvent.KEYCODE_VOLUME_UP:
+				return QK_F3;
 			case KeyEvent.KEYCODE_DPAD_UP:
 				return QK_UP;
 			case KeyEvent.KEYCODE_DPAD_DOWN:
