@@ -17,9 +17,8 @@ public class Launcher extends Activity{
 		Button button = (Button)findViewById(R.id.btnStartGame);
 		button.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				Intent intent = new Intent();
+				Intent intent = new Intent(v.getContext(),Game.class);
 				CheckBox chk = (CheckBox)findViewById(R.id.chkEnableSound);
-				intent.setClassName("org.kwaak3", "org.kwaak3.Game");
 				intent.putExtra("sound", chk.isChecked());
 				startActivity(intent);
 			}});
