@@ -121,11 +121,24 @@ class KwaakView extends GLSurfaceView {
 	private static final int QK_SHIFT = 138;
 	private static final int QK_CONSOLE = 340;
 
+	private static final int QK_F1 = 145;
+	private static final int QK_F2 = 146;
+	private static final int QK_F3 = 147;
+	private static final int QK_F4 = 148;
+	
 	private int androidKeyCodeToQuake(int aKeyCode, KeyEvent event)
 	{	
 		/* Convert non-ASCII keys by hand */
 		switch(aKeyCode)
 		{
+			/* For now map the focus buttons to F1 and let the user remap it in game.
+			 * This should allow some basic movement on the Nexus One if people map it to forward.
+			 * At least on the Milestone the camera button itself is shared with the Focus one. You have
+			 * to press focus first and then you hit camera, this leads to the following event sequence which
+			 * I don't handle right now: focus_down -> camera_down -> camera_up -> focus_up.
+			 */
+			case KeyEvent.KEYCODE_FOCUS:
+				return QK_F1;
 			case KeyEvent.KEYCODE_DPAD_UP:
 				return QK_UP;
 			case KeyEvent.KEYCODE_DPAD_DOWN:
