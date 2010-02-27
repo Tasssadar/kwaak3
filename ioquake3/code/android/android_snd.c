@@ -25,8 +25,8 @@ static int chunkSizeBytes=0;
 static int dmapos=0;
 
 int  (*getPos)(void);
-void (*initAudio)(void);
-void (*writeAudio)(void *data, int length);
+void (*initAudio)(void *buffer, int size);
+void (*writeAudio)(int offset, int length);
 
 void setAudioCallbacks(void *get_pos, void *write_audio, void *init_audio)
 {
@@ -53,7 +53,7 @@ qboolean SNDDMA_Init(void)
 
     chunkSizeBytes = dma.submission_chunk * bytes_per_sample;
 
-    initAudio();
+    initAudio(dma.buffer, buf_size);
 
     return qtrue;
 }
@@ -76,7 +76,7 @@ void SNDDMA_BeginPainting (void)
 void requestAudioData(void)
 {
     int offset = (dmapos * bytes_per_sample) & (buf_size - 1);
-    writeAudio(dma.buffer+offset, chunkSizeBytes);
+    writeAudio(offset, chunkSizeBytes);
     dmapos+=dma.submission_chunk;
 }
 

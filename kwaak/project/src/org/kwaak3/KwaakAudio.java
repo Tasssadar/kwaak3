@@ -19,6 +19,8 @@
 
 package org.kwaak3;
 
+import java.nio.ByteBuffer;
+
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
@@ -27,6 +29,7 @@ import android.util.Log;
 public class KwaakAudio {
 	private KwaakAudioTrack mAudioTrack;
 	private int bytesWritten=0;
+	byte[] mAudioData = new byte[8192];
 	
 	public int getPos()
 	{
@@ -64,13 +67,16 @@ public class KwaakAudio {
 		mAudioTrack.setPositionNotificationPeriod(2048);
 	}
 
-	public void writeAudio(byte[] audioData, int len)
+	public void writeAudio(ByteBuffer audioData, int offset, int len)
 	{
 		if(mAudioTrack == null)
 			return;
-		
-		int written = mAudioTrack.write(audioData, 0, len);
-		bytesWritten += written;
+	
+		/* The Quake3 audio buffer is shared with the Java side. Set the audioData to the right position
+		 * and read a chunk of size len to a normal byte array */
+		audioData.position(offset);
+		audioData.get(mAudioData, 0, len);
+		bytesWritten += mAudioTrack.write(mAudioData, 0, len);
 	}
 	
 	public void pause()
@@ -116,7 +122,7 @@ class KwaakAudioTrack extends AudioTrack
 		initBuffer();
 	}
 
-	private void initBuffer()
+	public void initBuffer()
 	{
 		byte[] audioData = new byte[getNativeFrameCount()*mFrameSize];
 		write(audioData, 0, audioData.length);

@@ -44,6 +44,7 @@ static char* lib_dir=NULL;
 
 static JavaVM *jVM;
 static jboolean audioEnabled=1;
+static jobject audioBuffer=0;
 static jobject kwaakAudioObj=0;
 static void *libdl;
 static int init=0;
@@ -146,29 +147,28 @@ int getPos()
     return (*env)->CallIntMethod(env, kwaakAudioObj, android_getPos);
 }
 
-void initAudio()
+void initAudio(void *buffer, int size)
 {
     JNIEnv *env;
     (*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4);
 #ifdef DEBUG
     __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "initAudio");
 #endif
+    audioBuffer = (*env)->NewDirectByteBuffer(env, buffer, size);
+    if(!audioBuffer) __android_log_print(ANDROID_LOG_ERROR, "Quake_JNI", "yikes, unable to initialize audio buffer");
+
     return (*env)->CallVoidMethod(env, kwaakAudioObj, android_initAudio);
 }
 
-void writeAudio(void *data, int length)
+void writeAudio(int offset, int length)
 {
     JNIEnv *env;
     (*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4);
 #ifdef DEBUG
-    __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "writeAudio data=%p length=%d", data, length);
+    __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "writeAudio audioBuffer=%p offset=%d length=%d", audioBuffer, offset, length);
 #endif
 
-    jbyteArray array = (*env)->NewByteArray(env, length);
-    if(array) {
-        (*env)->SetByteArrayRegion(env, array, 0, length, data);
-        (*env)->CallVoidMethod(env, kwaakAudioObj, android_writeAudio, array, length );
-    }
+    (*env)->CallVoidMethod(env, kwaakAudioObj, android_writeAudio, audioBuffer, offset, length);
 }
 
 
@@ -207,7 +207,7 @@ JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_setAudio(JNIEnv *env, jclass c, 
 
     android_getPos = (*env)->GetMethodID(env,kwaakAudioClass,"getPos","()I");
     android_initAudio = (*env)->GetMethodID(env,kwaakAudioClass,"initAudio","()V");
-    android_writeAudio = (*env)->GetMethodID(env,kwaakAudioClass,"writeAudio","([BI)V");
+    android_writeAudio = (*env)->GetMethodID(env,kwaakAudioClass,"writeAudio","(Ljava/nio/ByteBuffer;II)V");
 }
 
 
