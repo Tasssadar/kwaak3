@@ -150,11 +150,14 @@ int getPos()
 void initAudio(void *buffer, int size)
 {
     JNIEnv *env;
+    jobject tmp;
     (*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4);
 #ifdef DEBUG
     __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "initAudio");
 #endif
-    audioBuffer = (*env)->NewDirectByteBuffer(env, buffer, size);
+    tmp = (*env)->NewDirectByteBuffer(env, buffer, size);
+    audioBuffer = (jobject)(*env)->NewGlobalRef(env, tmp);
+
     if(!audioBuffer) __android_log_print(ANDROID_LOG_ERROR, "Quake_JNI", "yikes, unable to initialize audio buffer");
 
     return (*env)->CallVoidMethod(env, kwaakAudioObj, android_initAudio);
@@ -203,6 +206,7 @@ JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_setAudio(JNIEnv *env, jclass c, 
     jclass kwaakAudioClass;
 
     (*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4);
+    kwaakAudioObj = (jobject)(*env)->NewGlobalRef(env, obj);
     kwaakAudioClass = (*env)->GetObjectClass(env, kwaakAudioObj);
 
     android_getPos = (*env)->GetMethodID(env,kwaakAudioClass,"getPos","()I");
