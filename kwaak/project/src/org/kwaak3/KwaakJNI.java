@@ -24,6 +24,10 @@
 package org.kwaak3;
 
 public class KwaakJNI {
+	public static native void enableAudio(boolean enable);
+	public static native void enableBenchmark(boolean enable);
+	public static native void setAudio(KwaakAudio audio);
+	
 	/* Initialize the game engine */
 	public static native void initGame(int width, int height);
 
@@ -36,6 +40,8 @@ public class KwaakJNI {
 	public static native void queueKeyEvent(int key, int state);
 	public static native void queueMotionEvent(int action, float x, float y, float pressure);
 	public static native void queueTrackballEvent(int action, float x, float y);
+
+	public static native void requestAudioData();
 
 	static {
 		System.loadLibrary("kwaakjni");
