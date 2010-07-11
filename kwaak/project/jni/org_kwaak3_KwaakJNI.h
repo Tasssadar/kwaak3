@@ -25,11 +25,27 @@ JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_enableBenchmark
 
 /*
  * Class:     org_kwaak3_KwaakJNI
+ * Method:    enableLightmaps
+ * Signature: (Z)V
+ */
+JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_enableLightmaps
+  (JNIEnv *, jclass, jboolean);
+
+/*
+ * Class:     org_kwaak3_KwaakJNI
  * Method:    setAudio
  * Signature: (Lorg/kwaak3/KwaakAudio;)V
  */
 JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_setAudio
   (JNIEnv *, jclass, jobject);
+
+/*
+ * Class:     org_kwaak3_KwaakJNI
+ * Method:    showFramerate
+ * Signature: (Z)V
+ */
+JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_showFramerate
+  (JNIEnv *, jclass, jboolean);
 
 /*
  * Class:     org_kwaak3_KwaakJNI

@@ -44,7 +44,9 @@ static char* lib_dir=NULL;
 
 static JavaVM *jVM;
 static jboolean audioEnabled=1;
-static jboolean benchmarkEnabled=1;
+static jboolean benchmarkEnabled=0;
+static jboolean lightmapsEnabled=0;
+static jboolean showFramerateEnabled=0;
 static jobject audioBuffer=0;
 static jobject kwaakAudioObj=0;
 static void *libdl;
@@ -206,6 +208,16 @@ JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_enableBenchmark(JNIEnv *env, jcl
     benchmarkEnabled = enable;
 }
 
+JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_enableLightmaps(JNIEnv *env, jclass c, jboolean enable)
+{
+    lightmapsEnabled = enable;
+}
+
+JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_showFramerate(JNIEnv *env, jclass c, jboolean enable)
+{
+    showFramerateEnabled = enable;
+}
+
 JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_setAudio(JNIEnv *env, jclass c, jobject obj)
 {
     kwaakAudioObj = obj;
@@ -223,8 +235,10 @@ JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_setAudio(JNIEnv *env, jclass c, 
 
 JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_initGame(JNIEnv *env, jclass c, jint width, jint height)
 {
-    char *argv[3];
+    char *argv[4];
     int argc=0;
+
+    /* TODO: integrate settings with quake3, right now there is no synchronization */
 
     if(!audioEnabled)
     {
@@ -232,7 +246,16 @@ JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_initGame(JNIEnv *env, jclass c, 
         argc++;
     }
 
-    argv[argc] = strdup("+r_vertexlight 1");
+    if(lightmapsEnabled)
+        argv[argc] = strdup("+set r_vertexlight 0");
+    else
+        argv[argc] = strdup("+set r_vertexlight 1");
+    argc++;
+
+    if(showFramerateEnabled)
+        argv[argc] = strdup("+set cg_drawfps 1");
+    else
+        argv[argc] = strdup("+set cg_drawfps 0");
     argc++;
 
     if(benchmarkEnabled)

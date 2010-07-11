@@ -26,7 +26,9 @@ package org.kwaak3;
 public class KwaakJNI {
 	public static native void enableAudio(boolean enable);
 	public static native void enableBenchmark(boolean enable);
+	public static native void enableLightmaps(boolean enable);
 	public static native void setAudio(KwaakAudio audio);
+	public static native void showFramerate(boolean enable);
 	
 	/* Initialize the game engine */
 	public static native void initGame(int width, int height);

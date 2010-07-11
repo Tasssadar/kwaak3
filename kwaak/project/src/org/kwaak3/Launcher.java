@@ -20,6 +20,13 @@ public class Launcher extends Activity{
 				Intent intent = new Intent(v.getContext(),Game.class);
 				CheckBox chk = (CheckBox)findViewById(R.id.chkEnableSound);
 				intent.putExtra("sound", chk.isChecked());
+
+				chk = (CheckBox)findViewById(R.id.chkShowFramerate);
+				intent.putExtra("showfps", chk.isChecked());
+
+				chk = (CheckBox)findViewById(R.id.chkEnableLightmaps);
+				intent.putExtra("lightmaps", chk.isChecked());
+				
 				startActivity(intent);
 			}});
 
@@ -29,6 +36,13 @@ public class Launcher extends Activity{
 				Intent intent = new Intent(v.getContext(),Game.class);
 				CheckBox chk = (CheckBox)findViewById(R.id.chkEnableSound);
 				intent.putExtra("sound", chk.isChecked());
+				
+				chk = (CheckBox)findViewById(R.id.chkShowFramerate);
+				intent.putExtra("showfps", chk.isChecked());
+
+				chk = (CheckBox)findViewById(R.id.chkEnableLightmaps);
+				intent.putExtra("lightmaps", chk.isChecked());			
+				
 				intent.putExtra("benchmark", true);
 				startActivity(intent);
 			}});

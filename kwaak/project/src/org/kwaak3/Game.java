@@ -107,8 +107,16 @@ public class Game extends Activity {
 				 */
 				KwaakJNI.enableAudio(extras.getBoolean("sound"));
 
+				/* Enable lightmaps for rendering (default=disabled).
+				 * Enabling causes a performance hit of typically 25% (on Milestone + Nexus One).
+				 */
+				KwaakJNI.enableLightmaps(extras.getBoolean("lightmaps"));
+				
 				/* Run a timedemo */
 				KwaakJNI.enableBenchmark(extras.getBoolean("benchmark"));
+
+				/* Show the framerate */
+				KwaakJNI.showFramerate(extras.getBoolean("showfps"));
 			}
 		}
 		else
