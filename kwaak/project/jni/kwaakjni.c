@@ -44,6 +44,7 @@ static char* lib_dir=NULL;
 
 static JavaVM *jVM;
 static jboolean audioEnabled=1;
+static jboolean benchmarkEnabled=1;
 static jobject audioBuffer=0;
 static jobject kwaakAudioObj=0;
 static void *libdl;
@@ -200,6 +201,11 @@ JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_enableAudio(JNIEnv *env, jclass 
     audioEnabled = enable;
 }
 
+JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_enableBenchmark(JNIEnv *env, jclass c, jboolean enable)
+{
+    benchmarkEnabled = enable;
+}
+
 JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_setAudio(JNIEnv *env, jclass c, jobject obj)
 {
     kwaakAudioObj = obj;
@@ -217,14 +223,24 @@ JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_setAudio(JNIEnv *env, jclass c, 
 
 JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_initGame(JNIEnv *env, jclass c, jint width, jint height)
 {
-    char *argv[2];
+    char *argv[3];
     int argc=0;
 
     if(!audioEnabled)
     {
-        argv[0] = strdup("+set s_initsound 0");
-        argc = 1;
+        argv[argc] = strdup("+set s_initsound 0");
+        argc++;
     }
+
+    argv[argc] = strdup("+r_vertexlight 1");
+    argc++;
+
+    if(benchmarkEnabled)
+    {
+        argv[argc] = strdup("+demo four +timedemo 1");
+        argc++;
+    }
+
 #ifdef DEBUG
     __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "initGame(%d, %d)", width, height);
 #endif

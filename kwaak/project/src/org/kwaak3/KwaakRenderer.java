@@ -24,11 +24,14 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.opengl.GLSurfaceView;
 import android.util.Log;
-import android.util.TimingLogger;
 
 public class KwaakRenderer implements GLSurfaceView.Renderer {
 	private boolean mInit=false;
 	
+	public KwaakRenderer() {
+		super();
+	}
+
 	public void onDrawFrame(GL10 gl) {
 		/* Compute a new frame. After this call completes, Android will perform a eglSwapBuffers */
 		KwaakJNI.drawFrame();
@@ -40,6 +43,7 @@ public class KwaakRenderer implements GLSurfaceView.Renderer {
 		 */
 		if(mInit == false)
 		{
+			Log.d("Quake_JAVA", "onSurfaceChanged");
 			KwaakJNI.initGame(width, height);
 			mInit = true;
 		}

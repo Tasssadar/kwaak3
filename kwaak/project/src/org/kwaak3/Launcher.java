@@ -22,6 +22,17 @@ public class Launcher extends Activity{
 				intent.putExtra("sound", chk.isChecked());
 				startActivity(intent);
 			}});
+
+		button = (Button)findViewById(R.id.btnRunBenchmark);
+		button.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				Intent intent = new Intent(v.getContext(),Game.class);
+				CheckBox chk = (CheckBox)findViewById(R.id.chkEnableSound);
+				intent.putExtra("sound", chk.isChecked());
+				intent.putExtra("benchmark", true);
+				startActivity(intent);
+			}});
+		
 		
 		button = (Button)findViewById(R.id.btnVisitWebsite);
 		button.setOnClickListener(new OnClickListener() {

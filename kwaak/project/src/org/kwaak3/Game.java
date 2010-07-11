@@ -106,6 +106,9 @@ public class Game extends Activity {
 				 * can reactivate audio from the q3 console by issuing 's_initsound 1' + 'snd_restart'
 				 */
 				KwaakJNI.enableAudio(extras.getBoolean("sound"));
+
+				/* Run a timedemo */
+				KwaakJNI.enableBenchmark(extras.getBoolean("benchmark"));
 			}
 		}
 		else
