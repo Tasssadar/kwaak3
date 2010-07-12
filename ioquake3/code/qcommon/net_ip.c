@@ -76,7 +76,8 @@ static qboolean	winsockInitialized = qfalse;
 #		include <ifaddrs.h>
 #	endif
 
-	#if defined(ANDROID)
+	/* Old versions of the Android NDK had buggy ipv6 headers */
+	#if defined(ANDROID) && !defined(IN6ADDR_ANY_INIT)
 		#define IPV6_JOIN_GROUP IPV6_ADD_MEMBERSHIP
 		#define IPV6_LEAVE_GROUP IPV6_DROP_MEMBERSHIP
 		#define ipv6mr_interface ipv6mr_ifindex
