@@ -42,7 +42,7 @@ static void GLimp_InitExtensions( void )
 	glConfig.textureCompression = TC_NONE;
 
 	// GL_EXT_texture_compression_s3tc
-	if ( GLimp_HaveExtension( "GL_ARB_texture_compression" ) &&
+	if ( GLimp_HaveExtension( "GL_ARB_texture_compression" ) ||
 	     GLimp_HaveExtension( "GL_EXT_texture_compression_s3tc" ) )
 	{
 		if ( r_ext_compressed_textures->value )
