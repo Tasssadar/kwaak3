@@ -46,20 +46,14 @@ Sys_DefaultHomePath
 */
 char *Sys_DefaultHomePath(void)
 {
-	char p[] = "/sdcard/quake3";
-	Q_strncpyz( homePath, p, sizeof( homePath ) );
+	char *p;
 
-#if 0
 	if( !*homePath )
 	{
-		if( ( p = getenv( "HOME" ) ) != NULL )
+		if( ( p = getenv( "GAME_PATH" ) ) != NULL )
 		{
 			Q_strncpyz( homePath, p, sizeof( homePath ) );
-#ifdef MACOS_X
-			Q_strcat( homePath, sizeof( homePath ), "/Library/Application Support/Quake3" );
-#else
-			Q_strcat( homePath, sizeof( homePath ), "/.q3a" );
-#endif
+
 			if( mkdir( homePath, 0777 ) )
 			{
 				if( errno != EEXIST )
@@ -70,7 +64,6 @@ char *Sys_DefaultHomePath(void)
 			}
 		}
 	}
-#endif
 	return homePath;
 }
 
