@@ -45,6 +45,13 @@ static qboolean trackball_event = qfalse;
 static float trackball_dx = 0;
 static float trackball_dy = 0;
 
+void (*setMenuState)(int shown);
+
+void setInputCallbacks(void *set_menu_state)
+{
+    setMenuState = set_menu_state;
+}
+
 void queueKeyEvent(int key, int state)
 {
     int t = Sys_Milliseconds();
@@ -135,7 +142,7 @@ inline int scale_y_input(float y)
     return (int)(y*scale_ratio);
 }
 
-static void processMotionEvents()
+static void processMotionEvents(void)
 {
     if(motion_event)
     {
@@ -199,7 +206,7 @@ inline float clamp_to_screen_height(float y)
     return y;
 }
 
-static void processTrackballEvents()
+static void processTrackballEvents(void)
 {
     if(trackball_event)
     {
@@ -227,8 +234,22 @@ static void processTrackballEvents()
 
 void IN_Frame(void)
 {
+    static int prev_state = -1;
+    int state = -1;
     processMotionEvents();
     processTrackballEvents();
+
+    /* We are in game */
+    if (cls.state == CA_ACTIVE)
+        state = 1;
+    else
+        state = 0;
+
+    if (state != prev_state)
+    {
+        setMenuState(state);
+        prev_state = state;
+    }
 }
 
 void IN_Init(void)
