@@ -239,8 +239,8 @@ void IN_Frame(void)
     processMotionEvents();
     processTrackballEvents();
 
-    /* We are in game */
-    if (cls.state == CA_ACTIVE)
+    /* We are in game and neither console/ui is active */
+    if (cls.state == CA_ACTIVE && Key_GetCatcher() == 0)
         state = 1;
     else
         state = 0;
