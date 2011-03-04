@@ -32,12 +32,17 @@ void (*queueMotionEvent)(int action, float x, float y, float pressure);
 void (*queueTrackballEvent)(int action, float x, float y);
 void (*requestAudioData)();
 void (*setAudioCallbacks)(void *func, void *func2, void *func3);
+void (*setInputCallbacks)(void *func);
 void (*setResolution)(int width, int height);
 
 /* Callbacks to Android */
 jmethodID android_getPos;
 jmethodID android_initAudio;
 jmethodID android_writeAudio;
+jmethodID android_setMenuState;
+
+/* Contains the game directory e.g. /mnt/sdcard/quake3 */
+static char* game_dir=NULL;
 
 /* Containts the path to /data/data/(package_name)/libs */
 static char* lib_dir=NULL;
@@ -49,23 +54,26 @@ static jboolean lightmapsEnabled=0;
 static jboolean showFramerateEnabled=0;
 static jobject audioBuffer=0;
 static jobject kwaakAudioObj=0;
+static jobject kwaakRendererObj=0;
 static void *libdl;
 static int init=0;
 
-typedef unsigned char BOOL;
-#define FALSE 0
-#define TRUE 1
-
 //#define DEBUG
+typedef enum fp_type 
+{
+     FP_TYPE_NONE = 0,
+     FP_TYPE_VFP  = 1,
+     FP_TYPE_NEON = 2
+} fp_type_t;
 
-static BOOL neon_support()
+static fp_type_t fp_support()
 {
     char buf[80];
     FILE *fp = fopen("/proc/cpuinfo", "r");
     if(!fp)
     {
         __android_log_print(ANDROID_LOG_DEBUG, "Quake", "Unable to open /proc/cpuinfo\n");
-        return FALSE;
+        return FP_TYPE_NONE;
     }
 
     while(fgets(buf, 80, fp) != NULL)
@@ -74,27 +82,34 @@ static BOOL neon_support()
 
         if(features)
         {
+            fp_type_t fp_supported_type = FP_TYPE_NONE;
             char *feature;
             features += strlen("Features");
             feature = strtok(features, ": ");
             while(feature)
             {
+                /* We prefer Neon if it is around, else VFP is also okay */
                 if(!strcmp(feature, "neon"))
-                    return TRUE;
+                    return FP_TYPE_NEON;
+                else if(!strcmp(feature, "vfp"))
+                    fp_supported_type = FP_TYPE_VFP;
 
                 feature = strtok(NULL, ": ");
             }
-            return FALSE;
+            return fp_supported_type;
         }
     }
-    return FALSE;
+    return FP_TYPE_NONE;
 }
 
 const char *get_quake3_library()
 {
     /* We ship a library with Neon FPU support. This boosts performance a lot but it only works on a few CPUs. */
-    if(neon_support())
+    fp_type_t fp_supported_type = fp_support();
+    if(fp_supported_type == FP_TYPE_NEON)
         return "libquake3_neon.so";
+    else if (fp_supported_type == FP_TYPE_VFP)
+        return "libquake3_vfp.so";
 
     return "libquake3.so";
 }
@@ -136,6 +151,7 @@ static void load_libquake3()
     queueTrackballEvent = dlsym(libdl, "queueTrackballEvent");
     requestAudioData = dlsym(libdl, "requestAudioData");
     setAudioCallbacks = dlsym(libdl, "setAudioCallbacks");
+    setInputCallbacks = dlsym(libdl, "setInputCallbacks");
     setResolution = dlsym(libdl, "setResolution");
     init=1;
 }
@@ -177,6 +193,16 @@ void writeAudio(int offset, int length)
     (*env)->CallVoidMethod(env, kwaakAudioObj, android_writeAudio, audioBuffer, offset, length);
 }
 
+void setMenuState(int state)
+{
+    JNIEnv *env;
+    (*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4);
+#ifdef DEBUG
+    __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "setMenuState state=%d", state);
+#endif
+
+    (*env)->CallVoidMethod(env, kwaakRendererObj, android_setMenuState, state);
+}
 
 int JNI_OnLoad(JavaVM* vm, void* reserved)
 {
@@ -232,6 +258,18 @@ JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_setAudio(JNIEnv *env, jclass c, 
     android_writeAudio = (*env)->GetMethodID(env,kwaakAudioClass,"writeAudio","(Ljava/nio/ByteBuffer;II)V");
 }
 
+JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_setRenderer(JNIEnv *env, jclass c, jobject obj)
+{
+    kwaakRendererObj = obj;
+    jclass kwaakRendererClass;
+
+    (*jVM)->GetEnv(jVM, (void**) &env, JNI_VERSION_1_4);
+    kwaakRendererObj = (jobject)(*env)->NewGlobalRef(env, obj);
+    kwaakRendererClass = (*env)->GetObjectClass(env, kwaakRendererObj);
+
+    android_setMenuState = (*env)->GetMethodID(env,kwaakRendererClass,"setMenuState","(I)V");
+}
+
 
 JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_initGame(JNIEnv *env, jclass c, jint width, jint height)
 {
@@ -269,6 +307,7 @@ JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_initGame(JNIEnv *env, jclass c, 
 #endif
 
     setAudioCallbacks(&getPos, &writeAudio, &initAudio);
+    setInputCallbacks(&setMenuState);
     setResolution(width, height);
 
     /* In the future we might want to pass arguments using argc/argv e.g. to start a benchmark at startup, to load a mod or whatever */
@@ -312,6 +351,19 @@ JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_requestAudioData(JNIEnv *env, jc
     if(requestAudioData) requestAudioData();
 }
 
+JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_setGameDirectory(JNIEnv *env, jclass c, jstring jpath)
+{
+    jboolean iscopy;
+    const jbyte *path = (*env)->GetStringUTFChars(env, jpath, &iscopy);
+    game_dir = strdup(path);
+    setenv("GAME_PATH", game_dir, 1);
+    (*env)->ReleaseStringUTFChars(env, jpath, path);
+
+#ifdef DEBUG
+    __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "game path=%s\n", game_dir);
+#endif
+}
+
 JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_setLibraryDirectory(JNIEnv *env, jclass c, jstring jpath)
 {
     jboolean iscopy;
@@ -320,6 +372,6 @@ JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_setLibraryDirectory(JNIEnv *env,
     (*env)->ReleaseStringUTFChars(env, jpath, path);
 
 #ifdef DEBUG
-    __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "path=%s\n", lib_dir);
+    __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "library path=%s\n", lib_dir);
 #endif
 }
