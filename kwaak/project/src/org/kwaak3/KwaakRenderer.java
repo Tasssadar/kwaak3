@@ -32,9 +32,11 @@ public class KwaakRenderer implements GLSurfaceView.Renderer {
 		super();
 	}
 
+	
 	public void onDrawFrame(GL10 gl) {
 		/* Compute a new frame. After this call completes, Android will perform a eglSwapBuffers */
-		KwaakJNI.drawFrame();
+		if(mInit)
+			KwaakJNI.drawFrame();
 	}
 	
 	public void onSurfaceChanged(GL10 gl, int width, int height) {

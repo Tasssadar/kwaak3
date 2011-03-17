@@ -32,17 +32,22 @@ class KwaakView extends GLSurfaceView {
 	
 	public KwaakView(Context context){
 		super(context);
-
-		/* We need the path to the library directory for dlopen in our JNI library */
+	
+		
+		
+	/* We need the path to the library directory for dlopen in our JNI library */
 		String cache_dir, lib_dir;
 		try {
 			cache_dir = context.getCacheDir().getCanonicalPath();
+			
 			lib_dir = cache_dir.replace("cache", "lib");
 		} catch (IOException e) {
 			e.printStackTrace();
 			lib_dir = "/data/data/org.kwaak3/lib";
 		}
+		KwaakJNI.setGameDirectory("/mnt/sdcard/quake3");
 		KwaakJNI.setLibraryDirectory(lib_dir);
+		
 		
 		mKwaakRenderer = new KwaakRenderer();
 		setRenderer(mKwaakRenderer);
@@ -72,6 +77,7 @@ class KwaakView extends GLSurfaceView {
 		return queueMotionEvent(event.getAction(), event.getX(), event.getY(), event.getPressure());
 	}
 
+	
 	@Override
 	public boolean onTrackballEvent(MotionEvent event) {
 		//Log.d("Quake_JAVA", "onTrackballEvent action=" + event.getAction() + " x=" + event.getX() + " y=" + event.getY());

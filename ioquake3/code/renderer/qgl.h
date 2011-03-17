@@ -46,7 +46,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "macosx_glimp.h"
 
 #elif defined( __linux__ )
-
+#include <GLES/glplatform.h>
 #include <GLES/gl.h>
 
 #include "../android/android_glimp.h"

@@ -244,7 +244,7 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 	static int	lastErrorTime;
 	static int	errorCount;
 	int			currentTime;
-
+        Com_Printf("Com_Error");
 	Cvar_Set( "com_errorCode", va( "%i", code ) );
 
 	// when we are running automated scripts, make sure we
@@ -316,7 +316,7 @@ void QDECL Com_Error( int code, const char *fmt, ... ) {
 	}
 
 	Com_Shutdown ();
-
+        Com_Printf("%s", com_errorMessage);
 	Sys_Error ("%s", com_errorMessage);
 }
 

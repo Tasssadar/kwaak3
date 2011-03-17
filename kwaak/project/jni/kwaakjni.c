@@ -42,7 +42,7 @@ jmethodID android_writeAudio;
 jmethodID android_setMenuState;
 
 /* Contains the game directory e.g. /mnt/sdcard/quake3 */
-static char* game_dir=NULL;
+static char* game_dir="/mnt/sdcard/quake3";
 
 /* Containts the path to /data/data/(package_name)/libs */
 static char* lib_dir=NULL;
@@ -58,7 +58,7 @@ static jobject kwaakRendererObj=0;
 static void *libdl;
 static int init=0;
 
-//#define DEBUG
+#define DEBUG
 typedef enum fp_type 
 {
      FP_TYPE_NONE = 0,
@@ -105,7 +105,7 @@ static fp_type_t fp_support()
 const char *get_quake3_library()
 {
     /* We ship a library with Neon FPU support. This boosts performance a lot but it only works on a few CPUs. */
-    fp_type_t fp_supported_type = fp_support();
+	fp_type_t fp_supported_type = fp_support();
     if(fp_supported_type == FP_TYPE_NEON)
         return "libquake3_neon.so";
     else if (fp_supported_type == FP_TYPE_VFP)
@@ -201,7 +201,7 @@ void setMenuState(int state)
     __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "setMenuState state=%d", state);
 #endif
 
-    (*env)->CallVoidMethod(env, kwaakRendererObj, android_setMenuState, state);
+   // (*env)->CallVoidMethod(env, kwaakRendererObj, android_setMenuState, state);
 }
 
 int JNI_OnLoad(JavaVM* vm, void* reserved)

@@ -271,8 +271,8 @@ void CON_Init( void )
 	|| (term && (!strcmp(term, "raw") || !strcmp(term, "dumb"))))
 	{
 		Com_Printf("tty console mode disabled\n");
-		ttycon_on = qfalse;
-		stdin_active = qtrue;
+		ttycon_on = qtrue;
+		stdin_active = qfalse;
 		return;
 	}
 

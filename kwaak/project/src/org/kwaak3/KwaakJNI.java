@@ -29,11 +29,13 @@ public class KwaakJNI {
 	public static native void enableLightmaps(boolean enable);
 	public static native void setAudio(KwaakAudio audio);
 	public static native void showFramerate(boolean enable);
+
 	
 	/* Initialize the game engine */
 	public static native void initGame(int width, int height);
 
 	public static native void setLibraryDirectory(String path);
+	public static native void setGameDirectory(String path);
 
 	/* Compute and draw a new frame */
 	public static native void drawFrame();

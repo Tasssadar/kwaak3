@@ -42,6 +42,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 #endif
 #endif
+//#include "../SDL12/include/SDL_active.h"
+//#define SDL_APPMOUSEFOCUS 0x01 /* The app has mouse coverage */
+//#define SDL_APPINPUTFOCUS 0x02 /* The app has input focus */
+//#define SDL_APPACTIVE 0x04 /* The application is active */
 
 #include "sys_local.h"
 #include "sys_loadlib.h"
@@ -164,6 +168,7 @@ Sys_Quit
 */
 void Sys_Quit( void )
 {
+   Com_Printf("sys_quit");
 	CL_Shutdown( );
 	Sys_Exit( 0 );
 }
@@ -294,7 +299,7 @@ void Sys_Error( const char *error, ... )
 {
 	va_list argptr;
 	char    string[1024];
-
+Com_Printf("sys_error");
 	CL_Shutdown ();
 
 	va_start (argptr,error);
@@ -503,6 +508,8 @@ void Sys_SigHandler( int signal )
 		signalcaught = qtrue;
 		fprintf( stderr, "Received signal %d, exiting...\n", signal );
 #ifndef DEDICATED
+Com_Printf("sighandler %d", signal);
+		
 		CL_Shutdown();
 #endif
 		SV_Shutdown( "Signal caught" );
@@ -574,20 +581,15 @@ int main( int argc, char **argv )
 	signal( SIGSEGV, Sys_SigHandler );
 	signal( SIGTERM, Sys_SigHandler );
 
-#if 0
-	while( 1 )
+/*	while( 1 )
 	{
-#if !defined(NOKIA)
-#ifndef DEDICATED
-		int appState = SDL_GetAppState( );
 
-		Cvar_SetValue( "com_unfocused",	!( appState & SDL_APPINPUTFOCUS ) );
-		Cvar_SetValue( "com_minimized", !( appState & SDL_APPACTIVE ) );
-#endif
-#endif
+//		int appState = SDL_GetAppState( );
 
-	}
-#endif
+                Cvar_SetValue( "com_unfocused", qfalse );
+		Cvar_SetValue( "com_minimized", qfalse );
+
+	}*/
 
 	return 0;
 }

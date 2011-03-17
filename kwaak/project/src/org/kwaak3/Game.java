@@ -76,6 +76,7 @@ public class Game extends Activity {
 		return true;
 	}
 
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
