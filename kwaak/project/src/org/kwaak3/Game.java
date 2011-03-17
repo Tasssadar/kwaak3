@@ -23,15 +23,18 @@ import java.io.File;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.view.Window;
 import android.view.WindowManager;
 
 public class Game extends Activity {
 	private KwaakAudio mKwaakAudio;
 	private KwaakView mGLSurfaceView;
+	private WakeLock lock = null;
 
 	private void showError(String s)
 	{
@@ -99,6 +102,10 @@ public class Game extends Activity {
 			 */
 			mKwaakAudio = new KwaakAudio();
 			KwaakJNI.setAudio(mKwaakAudio);
+			
+			PowerManager pm = (PowerManager) getBaseContext().getSystemService(Context.POWER_SERVICE);
+            lock = pm.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK), "Kwaak3 lock");
+            lock.acquire();
 
 			Bundle extras = getIntent().getExtras();
 			if(extras != null)
@@ -119,6 +126,11 @@ public class Game extends Activity {
 				/* Show the framerate */
 				KwaakJNI.showFramerate(extras.getBoolean("showfps"));
 			}
+			if(mKwaakAudio != null)
+			{
+				mKwaakAudio.pause();
+				mKwaakAudio.resume();
+			}
 		}
 		else
 		{
@@ -128,6 +140,7 @@ public class Game extends Activity {
 
 	@Override
 	protected void onDestroy() {
+		lock.release();
 		super.onDestroy();
 	}
 
@@ -135,6 +148,7 @@ public class Game extends Activity {
 	protected void onPause() {
 		//Log.d("Quake_JAVA", "onPause");
 		super.onPause();
+		lock.release();
 
 		if(mKwaakAudio != null)
 			mKwaakAudio.pause();
@@ -152,7 +166,9 @@ public class Game extends Activity {
 		{
 			mGLSurfaceView.onResume();
 		}
-
+		PowerManager pm = (PowerManager) getBaseContext().getSystemService(Context.POWER_SERVICE);
+        lock = pm.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK), "YuniControl lock");
+        lock.acquire();
 		if(mKwaakAudio != null)
 			mKwaakAudio.resume();
 	}

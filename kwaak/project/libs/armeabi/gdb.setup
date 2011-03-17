@@ -1,0 +1,2 @@
+set solib-search-path /home/tassadar/kwaak3/kwaak/project/obj/local/armeabi
+directory /home/tassadar/android-ndk-r5b/platforms/android-8/arch-arm/usr/include /home/tassadar/kwaak3/kwaak/project/jni /home/tassadar/android-ndk-r5b/sources/cxx-stl/system

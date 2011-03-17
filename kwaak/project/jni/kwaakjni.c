@@ -200,7 +200,7 @@ void setMenuState(int state)
 #ifdef DEBUG
     __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "setMenuState state=%d", state);
 #endif
-
+   // causes segfault, dunno why
    // (*env)->CallVoidMethod(env, kwaakRendererObj, android_setMenuState, state);
 }
 
