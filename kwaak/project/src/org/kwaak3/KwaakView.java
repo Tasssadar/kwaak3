@@ -89,13 +89,6 @@ class KwaakView extends GLSurfaceView {
         return queueKeyEvent(qKeyCode, 0);
     }
     
-    private int fabs(int i)
-    {
-        if(i < 0)
-            return -i;
-        return i;
-    }
-    
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         //Log.d("Quake_JAVA", "onTouchEvent action=" + event.getAction() + " x=" + event.getX() + " y=" + event.getY() + " pressure=" + event.getPressure() + "size = " + event.getSize());
