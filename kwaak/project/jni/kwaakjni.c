@@ -20,9 +20,29 @@
 #include <dlfcn.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 #include <android/log.h>
 
 #include "org_kwaak3_KwaakJNI.h"
+
+enum keys
+{
+    QK_LEFT  = 134,
+    QK_RIGHT = 135,
+    QK_UP    = 132,
+    QK_DOWN  = 133,
+};
+#define TOUCH_RANGE 1.09956// PI * 0.35
+#define M_PI_X2 6.28319 // PI * 2
+
+#define DOWN_MIN  (M_PI_X2 - TOUCH_RANGE)
+#define DOWN_MAX  (TOUCH_RANGE)
+#define UP_MIN    (M_PI - TOUCH_RANGE)
+#define UP_MAX    (M_PI + TOUCH_RANGE)
+#define LEFT_MIN  ((M_PI_2*3) - TOUCH_RANGE)
+#define LEFT_MAX  ((M_PI_2*3) + TOUCH_RANGE)
+#define RIGHT_MIN (M_PI_2 - TOUCH_RANGE)
+#define RIGHT_MAX (M_PI_2 + TOUCH_RANGE)
 
 /* Function pointers to Quake3 code */
 int  (*q3main)(int argc, char **argv);
@@ -42,7 +62,7 @@ jmethodID android_writeAudio;
 jmethodID android_setMenuState;
 
 /* Contains the game directory e.g. /mnt/sdcard/quake3 */
-static char* game_dir="/mnt/sdcard/quake3";
+static char* game_dir="";
 
 /* Containts the path to /data/data/(package_name)/libs */
 static char* lib_dir=NULL;
@@ -58,7 +78,7 @@ static jobject kwaakRendererObj=0;
 static void *libdl;
 static int init=0;
 
-#define DEBUG
+//#define DEBUG
 typedef enum fp_type 
 {
      FP_TYPE_NONE = 0,
@@ -102,10 +122,17 @@ static fp_type_t fp_support()
     return FP_TYPE_NONE;
 }
 
+int m_fabs(int i)
+{
+    if(i < 0)
+        return -i;
+    return i;
+}
+
 const char *get_quake3_library()
 {
     /* We ship a library with Neon FPU support. This boosts performance a lot but it only works on a few CPUs. */
-	fp_type_t fp_supported_type = fp_support();
+    fp_type_t fp_supported_type = fp_support();
     if(fp_supported_type == FP_TYPE_NEON)
         return "libquake3_neon.so";
     else if (fp_supported_type == FP_TYPE_VFP)
@@ -374,4 +401,51 @@ JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_setLibraryDirectory(JNIEnv *env,
 #ifdef DEBUG
     __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "library path=%s\n", lib_dir);
 #endif
+}
+
+JNIEXPORT jbyte JNICALL Java_org_kwaak3_KwaakJNI_calculateMotion(JNIEnv *env, jclass c, jint baseX, jint baseY, jint X, jint Y, jshortArray curKeys)
+{
+    if(m_fabs(X-baseX) < 20 && m_fabs(Y-baseY) < 20)
+        return 0;
+
+    jshort *current = (jshort *)malloc(2);
+    (*env)->GetShortArrayRegion(env, curKeys, 0, 2, current);
+    jshort *new = (jshort *)malloc(2);
+
+    int dx = Y - baseY;
+    int dy = X - baseX;
+    float ang = atan2(dy, dx);
+    ang = (float) ((ang >= 0) ? ang : 2 * 3.141592 + ang);
+
+    if(ang > DOWN_MIN || ang <  DOWN_MAX) // 0.7 PI range
+        new[0] = QK_DOWN;
+    else if(ang > UP_MIN && ang < UP_MAX)
+        new[0] = QK_UP;
+    else
+        new[0] = 0;
+
+    if(ang > LEFT_MIN && ang < LEFT_MAX)
+        new[1] = QK_LEFT;
+    else if(ang > RIGHT_MIN && ang < RIGHT_MAX)
+        new[1] = QK_RIGHT;
+    else
+        new[1] = 0;
+
+    short itr = 0;
+    for(; itr < 2; ++itr)
+    {
+        if(new[itr] == current[itr])
+            continue;
+
+        if(current[itr] != 0) queueKeyEvent(current[itr], 0);
+        if(new[itr] != 0)     queueKeyEvent(new[itr], 1);
+    }
+    free(current);
+    (*env)->SetShortArrayRegion(env, curKeys, 0, 2, new );
+    free(new);
+
+#ifdef DEBUG
+    __android_log_print(ANDROID_LOG_DEBUG, "Quake_JNI", "calculate motion event base %u %u, current %u %u, angle %f", baseX, baseY, X, Y, ang);
+#endif
+    return 1;
 }

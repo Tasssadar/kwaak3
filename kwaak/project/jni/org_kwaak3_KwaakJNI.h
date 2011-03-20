@@ -89,6 +89,14 @@ JNIEXPORT void JNICALL Java_org_kwaak3_KwaakJNI_queueMotionEvent
 
 /*
  * Class:     org_kwaak3_KwaakJNI
+ * Method:    calculateMotion
+ * Signature: (IIII)jbyte
+ */
+JNIEXPORT jbyte JNICALL Java_org_kwaak3_KwaakJNI_calculateMotion
+  (JNIEnv *, jclass, jint, jint, jint, jint, jshortArray);
+
+/*
+ * Class:     org_kwaak3_KwaakJNI
  * Method:    queueTrackballEvent
  * Signature: (IFF)V
  */

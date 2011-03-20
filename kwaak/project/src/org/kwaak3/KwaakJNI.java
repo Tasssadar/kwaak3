@@ -24,31 +24,32 @@
 package org.kwaak3;
 
 public class KwaakJNI {
-	public static native void enableAudio(boolean enable);
-	public static native void enableBenchmark(boolean enable);
-	public static native void enableLightmaps(boolean enable);
-	public static native void setAudio(KwaakAudio audio);
-	public static native void showFramerate(boolean enable);
+    public static native void enableAudio(boolean enable);
+    public static native void enableBenchmark(boolean enable);
+    public static native void enableLightmaps(boolean enable);
+    public static native void setAudio(KwaakAudio audio);
+    public static native void showFramerate(boolean enable);
 
-	
-	/* Initialize the game engine */
-	public static native void initGame(int width, int height);
+    
+    /* Initialize the game engine */
+    public static native void initGame(int width, int height);
 
-	public static native void setLibraryDirectory(String path);
-	public static native void setGameDirectory(String path);
+    public static native void setLibraryDirectory(String path);
+    public static native void setGameDirectory(String path);
 
-	/* Compute and draw a new frame */
-	public static native void drawFrame();
+    /* Compute and draw a new frame */
+    public static native void drawFrame();
 
-	/* Keyboard and motion input */
-	public static native void queueKeyEvent(int key, int state);
-	public static native void queueMotionEvent(int action, float x, float y, float pressure);
-	public static native void queueTrackballEvent(int action, float x, float y);
+    /* Keyboard and motion input */
+    public static native void queueKeyEvent(int key, int state);
+    public static native void queueMotionEvent(int action, float x, float y, float pressure);
+    public static native void queueTrackballEvent(int action, float x, float y);
+    public static native byte calculateMotion(int baseX, int baseY, int X, int Y, short[] curkeys);
 
-	public static native void requestAudioData();
+    public static native void requestAudioData();
 
-	static {
-		System.loadLibrary("kwaakjni");
-	}
+    static {
+        System.loadLibrary("kwaakjni");
+    }
 }
 
