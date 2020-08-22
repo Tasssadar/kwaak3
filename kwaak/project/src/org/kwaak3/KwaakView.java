@@ -100,7 +100,7 @@ class KwaakView extends GLSurfaceView {
         {
             int x = (int) event.getX(i);
             int y = (int) event.getY(i);
-            if(!searchPressed && x > 240 && (action & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_DOWN)
+            if(!searchPressed && x > getWidth()/2 && (action & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_DOWN)
             {
                 mBaseX = x;
                 mBaseY = y;
